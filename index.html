@@ -1,0 +1,115 @@
+<!DOCTYPE html><html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MD5 Neon Ultra Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--neon1:#00ffd5;--neon2:#8f5bff}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at top,#0b102a,#02030c 70%);
+font-family:'Orbitron',sans-serif;color:white;display:flex;justify-content:center;align-items:center;overflow:hidden}
+.bg-anim{position:fixed;inset:0;background:linear-gradient(120deg,rgba(0,255,213,.18),rgba(143,91,255,.18));animation:bgMove 8s ease-in-out infinite alternate;z-index:-1}
+@keyframes bgMove{to{transform:translateY(-40px)}}
+.lite .bg-anim{display:none}
+.container{width:92%;max-width:420px;background:rgba(10,14,40,.65);border-radius:22px;padding:22px;
+box-shadow:0 0 45px rgba(0,255,213,.35);backdrop-filter:blur(10px)}
+h1{text-align:center;margin:0 0 18px;background:linear-gradient(90deg,var(--neon1),var(--neon2));-webkit-background-clip:text;color:transparent}
+.md5box{width:100%;padding:14px 16px;border-radius:16px;border:1px solid rgba(255,255,255,.18);
+background:rgba(0,0,0,.4);color:var(--neon1);font-size:15px;letter-spacing:1px;outline:none;
+box-shadow:inset 0 0 18px rgba(0,255,213,.25);transition:.3s}
+.md5box:focus{box-shadow:0 0 18px rgba(0,255,213,.6)}
+.modes{display:flex;gap:10px;margin:16px 0}
+.mode{flex:1;padding:10px;border-radius:14px;border:1px solid rgba(255,255,255,.15);
+background:rgba(0,0,0,.35);text-align:center;cursor:pointer;transition:.3s}
+.mode.active{background:linear-gradient(135deg,var(--neon1),var(--neon2));color:#000;box-shadow:0 0 20px rgba(0,255,213,.7)}
+.analyze{width:100%;padding:16px;border-radius:18px;border:none;font-size:16px;font-weight:700;cursor:pointer;
+background:linear-gradient(135deg,var(--neon1),var(--neon2));color:#000;box-shadow:0 0 28px rgba(0,255,213,.7);transition:.25s}
+.analyze:active{transform:scale(.96)}
+.loader{margin:26px auto 6px;width:64px;height:64px;border-radius:50%;border:4px solid rgba(255,255,255,.15);
+border-top-color:var(--neon1);animation:spin 1s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lite .loader{animation:none}
+.loading-text{text-align:center;font-size:12px;opacity:.8;margin-top:6px;display:none}
+.result{margin-top:20px;text-align:center;opacity:0;transform:translateY(18px) scale(.98);
+transition:opacity .9s,transform .9s}
+.lite .result{transition:.4s}
+.result.show{opacity:1;transform:none}
+.outcome{font-size:42px;margin-bottom:6px;text-shadow:0 0 25px rgba(0,255,213,.8)}
+.rate{font-size:14px;opacity:.85}
+.bar{margin-top:14px;height:10px;border-radius:6px;background:rgba(255,255,255,.1);overflow:hidden}
+.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--neon1),var(--neon2));width:0%;transition:width 1.2s ease}
+.lite .bar span{transition:width .4s}
+.watermark{text-align:center;margin-top:14px;font-size:11px;opacity:.35}.notice{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;justify-content:center;align-items:center;z-index:10; opacity:0;pointer-events:none;transition:opacity .5s} .notice.show{opacity:1;pointer-events:auto} .notice-box{background:rgba(10,14,40,.9);border-radius:18px;padding:22px;width:90%;max-width:360px; box-shadow:0 0 40px rgba(0,255,213,.5);text-align:center;transform:scale(.9);transition:transform .5s} .notice.show .notice-box{transform:scale(1)} .notice-box h2{margin:0 0 10px;background:linear-gradient(90deg,var(--neon1),var(--neon2));-webkit-background-clip:text;color:transparent} .notice-box p{font-size:13px;opacity:.9;line-height:1.5} .notice-box button{margin-top:14px;width:100%;padding:12px;border-radius:14px;border:none;font-weight:700; background:linear-gradient(135deg,var(--neon1),var(--neon2));color:#000}
+
+.lite-toggle{position:fixed;top:14px;right:14px;font-size:11px;padding:6px 10px;border-radius:12px; background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.2);cursor:pointer;z-index:5} .lite-toggle.active{background:linear-gradient(135deg,var(--neon1),var(--neon2));color:#000} </style>
+
+</head>
+<body>
+<div class="bg-anim"></div>
+<div class="lite-toggle" id="liteBtn">Fast Mode</div><div class="notice" id="notice">
+  <div class="notice-box">
+    <h2>MD5 Ultra Engine</h2>
+    <p>
+      Công cụ phân tích MD5 theo hướng <b>deterministic</b>,
+      sử dụng nhiều engine đánh giá pattern & entropy.<br><br>
+      Tool <b>Không random – Chỉ giải mã MD5</b>,
+      kết quả mang tính phân tích & tham khảo.<br><br>
+      Nếu bạn thấy công cụ này hữu ích,
+      một khoản ủng hộ nhỏ sẽ giúp dự án được duy trì và nâng cấp lâu dài ❤️<br><br>
+      <b>999988776666 MB Bank</b> 💰
+    </p>
+    <button onclick="closeNotice()">Bắt đầu</button>
+  </div>
+</div><div class="container">
+  <h1>MD5 Ultra Engine</h1>
+  <input id="md5" class="md5box" placeholder="Nhập MD5 (32 ký tự hex)" />
+  <div class="modes">
+    <div class="mode active" data-m="basic">BASIC</div>
+    <div class="mode" data-m="pro">PRO</div>
+    <div class="mode" data-m="super">SUPER</div>
+  </div>
+  <button class="analyze" onclick="analyze()">ANALYZE</button>
+  <div class="loader" id="loader"></div>
+  <div class="loading-text" id="loadingText">Initializing engines…</div>
+  <div class="result" id="result">
+    <div class="outcome" id="outcome"></div>
+    <div class="rate" id="rate"></div>
+    <div class="bar"><span id="bar"></span></div>
+    <div class="watermark">Tool By DuyPhuc</div>
+  </div>
+</div><script>
+let mode='basic';
+const texts=['Initializing engines…','Scanning MD5 entropy…','Running deep pattern analysis…','Finalizing decision…'];
+
+document.querySelectorAll('.mode').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.mode').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');mode=b.dataset.m
+});
+
+window.onload=()=>document.getElementById('notice').classList.add('show');
+function closeNotice(){document.getElementById('notice').classList.remove('show')}
+
+const liteBtn=document.getElementById('liteBtn');
+liteBtn.onclick=()=>{document.body.classList.toggle('lite');liteBtn.classList.toggle('active')}
+
+function analyze(){
+  const md5=document.getElementById('md5').value.trim().toLowerCase();
+  if(!/^[0-9a-f]{32}$/.test(md5))return alert('MD5 không hợp lệ');
+  const res=document.getElementById('result'),loader=document.getElementById('loader'),lt=document.getElementById('loadingText');
+  res.classList.remove('show');loader.style.display='block';lt.style.display='block';
+  let i=0;lt.textContent=texts[0];const t=setInterval(()=>{i=(i+1)%texts.length;lt.textContent=texts[i]},600);
+  setTimeout(()=>{
+    clearInterval(t);
+    let score=0;for(let i=0;i<md5.length;i++){const v=parseInt(md5[i],16);score+=((v%2===0)?1:-1)*(i%3+1)}
+    if(mode==='pro')score*=1.3;if(mode==='super')score*=1.6;
+    const outcome=score>=0?'TÀI':'XỈU';const acc=Math.min(99,50+Math.abs(score)%50);
+    loader.style.display='none';lt.style.display='none';
+    document.getElementById('outcome').textContent=outcome;
+    document.getElementById('rate').textContent='Độ tin cậy: '+acc+'%';
+    document.getElementById('bar').style.width=acc+'%';
+    res.classList.add('show');
+  },document.body.classList.contains('lite')?1200:2200)
+}
+</script></body>
+</html>
